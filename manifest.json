@@ -10,7 +10,7 @@
     "128": "icon.png"
   },
   "background": {
-    "scripts": ["js/core.js", "js/navigate.js", "js/flags.js", "js/actions.js", "js/background.js"]
+    "scripts": ["js/navigation.js", "js/mutations.js", "js/flags.js", "js/actions.js", "js/core.js", "js/background.js"]
   },
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://cdnjs.cloudflare.com; object-src 'self'",
   "permissions": [

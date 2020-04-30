@@ -1,15 +1,15 @@
 var flagDefinitions = {
     newTab: {
         mutations: [],
-        navigate: openInNewTab,
+        navigate: navigation.openInNewTab,
     },
     newWindow: {
         mutate: [],
-        navigate: openNewWindow,
+        navigate: navigation.openNewWindow,
     },
     incognito: {
         mutate: [],
-        navigate: openNewWindow,
+        navigate: navigation.openNewWindow,
         navigateOptions: {
             incognito: true,
         }
@@ -19,7 +19,7 @@ var flagDefinitions = {
             {
                 piece: 0,
                 whole: false,
-                mutate: encode,
+                mutate: mutations.encode,
             }
         ]
     },
@@ -27,7 +27,7 @@ var flagDefinitions = {
         mutate: [
             {
                 whole: true,
-                mutate: encode,
+                mutate: mutations.encode,
             }
         ]
     },
@@ -35,7 +35,7 @@ var flagDefinitions = {
         mutate: [
             {
                 whole: true,
-                mutate: toHelp, // Format a request to 
+                mutate: mutations.toHelp, // Format a request to
             }
         ],
     }

@@ -1,3 +1,10 @@
+/**
+ * Get suggestions to display for omnibox autocomplete
+ *
+ * @param {Object} keywordHierarchy
+ * @param {String} text
+ * @return {Array}
+ */
 var getSuggestions = function (keywordHierarchy, text) {
     var pieces = text.split(' '),
         suggestions = Object.keys(keywordHierarchy),
@@ -38,6 +45,14 @@ var getSuggestions = function (keywordHierarchy, text) {
     return [suggestions, prefix];
 };
 
+/**
+ *
+ * @param {Array} urlPieces
+ * @param {String} input
+ * @param {Number} count
+ * @param {Object|null} inputOptions
+ * @return {Array}
+ */
 var updateLastUrlPiece = function (urlPieces, input, count, inputOptions) {
     var lastUrlPiece = urlPieces.pop(),
         toReplace = '{' + count + '}';
@@ -75,84 +90,15 @@ var updateLastUrlPiece = function (urlPieces, input, count, inputOptions) {
     return urlPieces;
 };
 
-// var getUrl = function (keywordHierarchy, text) {
-//     var pieces = text.split(' '),
-//         current = keywordHierarchy,
-//         url = '',
-//         urlPieces = [],
-//         isInput = false,
-//         inputCounter = 0,
-//         inputLimit = 0,
-//         input = null;
-
-//     pieces.forEach(function (piece) {
-//         var currentPiece = current[piece],
-//             typeOf = typeof currentPiece;
-
-//         if (isInput) {
-//             url += piece;
-
-//             inputCounter++;
-
-//             urlPieces = updateLastUrlPiece(urlPieces, piece, inputCounter, input);
-//             // lastUrlPiece = urlPieces.pop();
-//             // // lastUrlPiece = lastUrlPiece.replace('{' + inputCounter + '}', piece);
-//             // urlPieces.push(updateUrlPiece(lastUrlPiece, piece, inputCounter));
-
-//             if (inputCounter === inputLimit) {
-//                 isInput = false;
-//                 input = null;
-//             }
-//         } else if (typeOf === 'string') {
-//             url += currentPiece;
-//             urlPieces.push(currentPiece);
-//         } else if (typeOf === 'object') {
-//             if (typeof currentPiece.self === 'string') {
-//                 if (typeof currentPiece.replace === true) {
-//                     url = currentPiece.self;
-//                     url = [currentPiece.self];
-//                 } else {
-//                     url += currentPiece.self;
-//                     urlPieces.push(currentPiece.self);
-//                 }
-//             }
-
-//             if (currentPiece.acceptsInput) {
-//                 isInput = true;
-//             } else if (typeof currentPiece.input === 'object') {
-//                 isInput = true;
-//                 inputLimit = currentPiece.input.count;
-//                 input = currentPiece.input;
-//             }
-
-//             if (typeof currentPiece.next === 'object') {
-//                 current = currentPiece.next;
-//             } else if (!isInput) {
-//                 return;
-//             }
-//         }
-//     });
-
-//     console.log(urlPieces);
-
-//     // Apply defaults if no further pieces set while expecting input
-//     if (isInput && typeof input === 'object' && Array.isArray(input.defaults)) {
-//         console.log('updating for input');
-//         console.log(input.defaults);
-
-//         input.defaults.forEach(function (def, index) {
-//             urlPieces = updateLastUrlPiece(urlPieces, def, index + 1, input);
-//         });
-//     }
-
-//     console.log(urlPieces);
-
-//     // console.log(url);
-//     // console.log(urlPieces.join(''))
-//     // navigate(url);
-//     return urlPieces.join('');
-// };
-
+/**
+ * Get detailed information regarding the URL and navigation
+ *
+ * @TODO This function is massive - break it down
+ *
+ * @param {Object} keywordHierarchy
+ * @param {String} text
+ * @return {Object}
+ */
 var getAction = function (keywordHierarchy, text) {
     var pieces = text.split(' '),
         current = keywordHierarchy,
@@ -176,9 +122,6 @@ var getAction = function (keywordHierarchy, text) {
             inputCounter++;
 
             urlPieces = updateLastUrlPiece(urlPieces, piece, inputCounter, input);
-            // lastUrlPiece = urlPieces.pop();
-            // // lastUrlPiece = lastUrlPiece.replace('{' + inputCounter + '}', piece);
-            // urlPieces.push(updateUrlPiece(lastUrlPiece, piece, inputCounter));
 
             if (inputCounter === inputLimit) {
                 isInput = false;
@@ -218,7 +161,7 @@ var getAction = function (keywordHierarchy, text) {
             if (typeof currentPiece.next === 'object') {
                 current = currentPiece.next;
             } else if (!isInput) {
-                // Why is this doing this?
+                // @TODO - Figure out why I did this
                 return;
             }
         } else if (typeof globalFlags[piece] === 'object') {
@@ -227,8 +170,6 @@ var getAction = function (keywordHierarchy, text) {
             flags.push(localFlags[piece]);
         }
     });
-
-    // console.log(urlPieces);
 
     // Apply defaults if no further pieces set while expecting input
     if (isInput && typeof input === 'object' && Array.isArray(input.defaults)) {
@@ -244,7 +185,7 @@ var getAction = function (keywordHierarchy, text) {
         urlPieces: urlPieces,
         urlPiecesFull: urlPiecesFull,
         inputPieces: pieces,
-        navigate: openInCurrentTab,
+        navigate: navigation.openInCurrentTab,
         navigateOptions: {},
         endsOnInput: isInput,
     };
@@ -266,11 +207,6 @@ var getAction = function (keywordHierarchy, text) {
     });
 
     action.url = action.urlPieces.join('');
-    // console.log(urlPieces);
 
-    // console.log(url);
-    // console.log(urlPieces.join(''))
-    // navigate(url);
-    // return urlPieces.join('');
     return action;
 };
