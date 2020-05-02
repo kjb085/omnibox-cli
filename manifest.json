@@ -11,6 +11,7 @@
     },
     "background": {
         "scripts": [
+            "js/global.js",
             "js/navigation.js",
             "js/mutations.js",
             "js/flags.js",

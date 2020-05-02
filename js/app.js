@@ -54,12 +54,7 @@ var app = new Vue({
             console.log(keywordHierarchy);
 
             // @TODO implement storage sync save
-            // chrome.storage.sync.set({ keywordHierarchy: keywordHierarchy }, function () {
-            //     // Confirm save
-            //     swal({
-
-            //     });
-            // });
+            // saveKeywordHierarchy(keywordHierarchy);
         },
     }
 });

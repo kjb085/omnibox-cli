@@ -2,16 +2,15 @@ var keywordHierarchy = {},
     // Find a way to reduce memory footprint of cache
     commandCache = {};
 
-// @TODO move this to core.js for reusability in options
-function setKeywordHierarchy () {
+var setKeywordHierarchy = function () {
     chrome.storage.sync.get(['keywordHierarchy'], function (result) {
-        keywordHierarchy = result.keywordHierarchy;
+        keywordHierarchy = createComputedProps(result.keywordHierarchy);
         commandCache = {};
 
         console.log('Keyword hierarchy changed:');
         console.log(result);
     });
-}
+};
 
 // Initialize keyword hierarchy cache
 setKeywordHierarchy();
@@ -23,8 +22,8 @@ function resetDefaultSuggestion() {
 }
 
 /**
- * @param {string[]} suggestions
- * @param {string|Array} prefix
+ * @param {String[]} suggestions
+ * @param {String|Array} prefix
  */
 function getSuggestionResults(suggestions, prefix) {
     var results = [];
@@ -55,10 +54,8 @@ chrome.storage.onChanged.addListener(function () {
 });
 
 chrome.omnibox.onInputChanged.addListener(function (text, suggestCallback) {
-    var suggestionsAndPrefix = getSuggestions(keywordHierarchy, text),
-        suggestions = suggestionsAndPrefix[0],
-        prefix = suggestionsAndPrefix[1],
-        suggestionResults = getSuggestionResults(suggestions, prefix);
+    var suggestionInfo = getSuggestionInfo(keywordHierarchy, text),
+        suggestionResults = getSuggestionResults(suggestionInfo.suggestions, suggestionInfo.prefix);
 
     suggestCallback(suggestionResults);
 });

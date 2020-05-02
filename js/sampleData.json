@@ -1,0 +1,119 @@
+{
+    "next": [
+        {
+            "keyword": "abc",
+            "self": "https://www.google.com",
+            "replace": false,
+            "next": [
+                {
+                    "keyword": "def",
+                    "self": "/test"
+                }
+            ]
+        },
+        {
+            "keyword": "test",
+            "self": "www.bing.com"
+        },
+        {
+            "keyword": "gitlab",
+            "self": "https://www.gitlab.com/cruise/",
+            "next": [
+                {
+                    "keyword": "php",
+                    "self": "cruisecritic-php/",
+                    "next": [
+                        {
+                            "keyword": "commits",
+                            "self": "commits/",
+                            "input": {
+                                "count": 1,
+                                "defaults": [""],
+                                "suggestions": [["staging", "master", "kb/"]],
+                                "mutations": [],
+                                "formats": []
+                            }
+                        },
+                        {
+                            "keyword": "merge_requests",
+                            "self": "merge_requests/"
+                        },
+                        {
+                            "keyword": "compare",
+                            "self": "merge_requests/new?utf8=✓&merge_request%5Bsource_branch%5D={1}&merge_request%5Btarget_branch%5D={2}",
+                            "input": {
+                                "count": 2,
+                                "defaults": ["staging", "master"],
+                                "suggestions": [["kb/", "staging"], ["staging", "master"]],
+                                "mutations": [],
+                                "formats": []
+                            }
+                        }
+                    ]
+                },
+                {
+                    "keyword": "admin",
+                    "self": "cc-admin-php/",
+                    "next": [
+                        {
+                            "keyword": "commits",
+                            "self": "commits/",
+                            "input": {
+                                "count": 1,
+                                "defaults": [""],
+                                "suggestions": [["staging", "master", "kb/"]],
+                                "mutations": [],
+                                "formats": []
+                            }
+                        },
+                        {
+                            "keyword": "merge_requests",
+                            "self": "merge_requests/"
+                        },
+                        {
+                            "keyword": "compare",
+                            "self": "merge_requests/new?utf8=✓&merge_request%5Bsource_branch%5D={1}&merge_request%5Btarget_branch%5D={2}",
+                            "input": {
+                                "count": 2,
+                                "defaults": ["staging", "master"],
+                                "suggestions": [["kb/", "staging"], ["staging", "master"]],
+                                "mutations": [],
+                                "formats": []
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "keyword": "r",
+            "self": "www.reddit.com/r/",
+            "input": {
+                "count": 1,
+                "suggestions": ["jailbreak", "eagles", "goldandblack"]
+            }
+        },
+        {
+            "keyword": "atp",
+            "self": "https://www.atptour.com/en/",
+            "next": [
+                {
+                    "keyword": "rankings",
+                    "self": "rankings/singles/"
+                },
+                {
+                    "keyword": "tournaments",
+                    "self": "tournaments"
+                }
+            ]
+        },
+        {
+            "keyword": "special",
+            "self": "http://theweekdaycafe.com/menuPDF/TheWeekdayCafe-Ewing-Specials.pdf"
+        },
+        {
+            "keyword": "traffic",
+            "self": "https://www.google.com/maps/@40.2446906,-74.8084201,13.62z/data=!5m1!1e1"
+        }
+    ]
+}

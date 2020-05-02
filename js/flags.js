@@ -20,7 +20,7 @@ var flagDefinitions = {
                 piece: 0,
                 whole: false,
                 mutate: mutations.encode,
-            }
+            },
         ]
     },
     mutateWholeExample: {
@@ -28,7 +28,7 @@ var flagDefinitions = {
             {
                 whole: true,
                 mutate: mutations.encode,
-            }
+            },
         ]
     },
     help: {
@@ -36,7 +36,7 @@ var flagDefinitions = {
             {
                 whole: true,
                 mutate: mutations.toHelp, // Format a request to
-            }
+            },
         ],
     }
 };

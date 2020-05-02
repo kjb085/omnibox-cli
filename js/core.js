@@ -1,212 +1,284 @@
+var pathCache = {},
+    cacheEnabled = true;
+
 /**
- * Get suggestions to display for omnibox autocomplete
- *
  * @param {Object} keywordHierarchy
  * @param {String} text
- * @return {Array}
  */
-var getSuggestions = function (keywordHierarchy, text) {
-    var pieces = text.split(' '),
-        suggestions = Object.keys(keywordHierarchy),
-        prefix = [],
-        suggestionCount = 0,
-        suggestionLimit = 1,
-        current = keywordHierarchy;
+var getPath = function (keywordHierarchy, text) {
+    var text = sanitizedText(text),
+        pieces = text.split(' '),
+        current = keywordHierarchy,
+        path = [],
+        activeInput = {},
+        inputCount = 0,
+        inputLimit = 0;
+
+    // Temporarily disabled
+    if (cacheEnabled && Array.isArray(pathCache[text])) {
+        return pathCache[text];
+    }
 
     pieces.forEach(function (piece) {
-        var currentPiece = current[piece],
-            currentPieceIsObject = typeof currentPiece === 'object';
+        // Is actively expecting input
+        if (inputCount < inputLimit) {
+            path.push(getInputPathItem(piece, activeInput, inputCount));
 
-        if (currentPieceIsObject && typeof currentPiece.input === 'object'
-            && Array.isArray(currentPiece.input.suggestions)
-            && suggestionCount < suggestionLimit) {
-            suggestions = currentPiece.input.suggestions[suggestionCount];
-
-            suggestionLimit = currentPiece.input.suggestions.length;
-            suggestionCount++;
+            inputCount++;
+        } else if (piece.indexOf('-') === 0) {
+            path.push(getFlagPathItem(piece));
         } else {
-            if (currentPieceIsObject && typeof currentPiece.next === 'object') {
-                suggestions = Object.keys(currentPiece.next);
-                current = currentPiece.next;
-                prefix.push(piece);
+            var currentIndex = current._nextIndex[piece] ?? null;
 
-                suggestionCount = 0;
-                suggestionLimit = 1;
-            } else  {
-                suggestions = suggestions.filter(function (keyword) {
-                    return keyword.indexOf(piece) === 0;
-                });
+            if (currentIndex !== null) {
+                current = current.next[currentIndex];
+                activeInput = {};
+                inputCount = 0;
+                inputLimit = 0;
 
-                return;
+                if (isObject(current.input)) {
+                    inputLimit = current.input.count ?? 1;
+                    activeInput = current.input;
+                }
+
+                path.push(getStandardPathItem(piece, current));
             }
         }
     });
 
-    return [suggestions, prefix];
+    // Finish out path with needed inputs
+    if (inputCount < inputLimit) {
+        while (inputCount < inputLimit) {
+            path.push(getInputPathItem(null, activeInput, inputCount));
+
+            inputCount++;
+        }
+    }
+
+    if (cacheEnabled) {
+        pathCache[text] = path;
+    }
+
+    return path;
 };
 
 /**
- *
- * @param {Array} urlPieces
- * @param {String} input
- * @param {Number} count
- * @param {Object|null} inputOptions
- * @return {Array}
+ * @param {String} piece
+ * @param {Object} activeInput
+ * @param {Number} inputIndex
+ * @return {Object}
  */
-var updateLastUrlPiece = function (urlPieces, input, count, inputOptions) {
-    var lastUrlPiece = urlPieces.pop(),
-        toReplace = '{' + count + '}';
+var getInputPathItem = function (piece, activeInput, inputIndex) {
+    return {
+        text: piece,
+        isInput: true,
+        isFlag: false,
+        suggestions: activeInput.suggestions[inputIndex] ?? [],
+        default: activeInput.defaults[inputIndex] ?? '',
+        mutations: activeInput.mutations[inputIndex] ?? [],
+        formats: activeInput.formats[inputIndex] ?? null,
+        inputIndex: inputIndex,
+    };
+};
 
-    if (typeof inputOptions === 'object') {
-        if (Array.isArray(inputOptions.mutations)) {
-            var inputMutations = inputOptions.mutations[count - 1];
+/**
+ * @param {String} piece
+ * @param {Object} keywordObject
+ * @return {Object}
+ */
+var getStandardPathItem = function (piece, keywordObject) {
+    return {
+        text: piece,
+        isInput: false,
+        isFlag: false,
+        replace: keywordObject.replace ?? false,
+        urlPiece: keywordObject.self,
+        suggestions: keywordObject._suggestions,
+    };
+};
 
-            inputMutations.forEach(function (mutation) {
-                mutationFunction = mutations[mutation];
+/**
+ * @param {String} piece
+ * @return {Object}
+ */
+var getFlagPathItem = function (piece) {
+    return {
+        text: piece,
+        isInput: false,
+        isFlag: true,
+        suggestions: null,
+    };
+};
 
-                if (typeof mutationFunction === 'function') {
-                    input = mutationFunction(input);
-                }
-            });
-        }
+/**
+ * Get suggestions to display for omnibox autocomplete
+ *
+ * @TODO - solve for multi input suggestions
+ *
+ * @param {Object} keywordHierarchy
+ * @param {String} text
+ * @return {Object}
+ */
+var getSuggestionInfo = function (keywordHierarchy, text) {
+    var path = getPath(keywordHierarchy, text),
+        pieces = text.split(' '),
+        lastItemIndex = pieces.length - 1,
+        lastPiece = pieces[lastItemIndex],
+        suggestions = [],
+        prefix = [];
 
-        if (Array.isArray(inputOptions.formats)) {
-            var format = inputOptions.formats[count - 1];
+    path.forEach(function (pathItem) {
+        prefix.push(pathItem.text);
+    });
 
-            input = format.replace('{+}', input);
-        }
-    }
-
-    if (lastUrlPiece.indexOf(toReplace) > -1) {
-        lastUrlPiece = lastUrlPiece.replace(toReplace, input);
-    } else if (typeof inputOptions.appendWith !== 'undefined') {
-        lastUrlPiece = lastUrlPiece + inputOptions.appendWith + input;
+    if (path.length === 0) {
+        suggestions = keywordHierarchy._suggestions;
+    } else if (lastPiece.indexOf('-') === 0) {
+        suggestions = Object.keys(globalFlags);
     } else {
-        lastUrlPiece = lastUrlPiece + input;
+        // Grab last set of valid suggestions
+        for (var index = path.length - 1; -1 < index; index--) {
+            if (path[index].suggestions !== null) {
+                suggestions = path[index].suggestions;
+                break;
+            }
+        }
     }
 
-    urlPieces.push(lastUrlPiece);
+    if (lastPiece) {
+        suggestions = suggestions.filter(function (keyword) {
+            return keyword.indexOf(lastPiece) === 0;
+        });
+    }
 
-    return urlPieces;
+    return {
+        suggestions: suggestions,
+        prefix: prefix,
+    };
 };
 
 /**
  * Get detailed information regarding the URL and navigation
- *
- * @TODO This function is massive - break it down
  *
  * @param {Object} keywordHierarchy
  * @param {String} text
  * @return {Object}
  */
 var getAction = function (keywordHierarchy, text) {
-    var pieces = text.split(' '),
-        current = keywordHierarchy,
-        url = '', // create default 404 page
-        urlPieces = [],
-        urlPiecesFull = [],
-        isInput = false,
-        inputCounter = 0,
-        inputLimit = 0,
-        input = null,
-        localFlags = {},
-        flags = [];
+    var path = getPath(keywordHierarchy, text),
+        action = {
+            url: '',
+            urlPieces: [],
+            inputPieces: text.split(' '),
+            navigate: navigation.openInCurrentTab,
+            navigateOptions: {},
+            // Add in 'endsOnInput'?
+        };
 
-    pieces.forEach(function (piece) {
-        var currentPiece = current[piece],
-            typeOf = typeof currentPiece;
-
-        if (isInput) {
-            url += piece;
-
-            inputCounter++;
-
-            urlPieces = updateLastUrlPiece(urlPieces, piece, inputCounter, input);
-
-            if (inputCounter === inputLimit) {
-                isInput = false;
-                input = null;
-            }
-        } else if (typeOf === 'string') {
-            url += currentPiece;
-            urlPieces.push(currentPiece);
-            urlPiecesFull.push({})
-        } else if (typeOf === 'object') {
-            if (typeof currentPiece.self === 'string') {
-                if (typeof currentPiece.replace === true) {
-                    url = currentPiece.self;
-                    url = [currentPiece.self];
-                } else {
-                    url += currentPiece.self;
-                    urlPieces.push(currentPiece.self);
-                }
-            }
-
-            if (currentPiece.acceptsInput) {
-                isInput = true;
-            } else if (typeof currentPiece.input === 'object') {
-                isInput = true;
-                inputLimit = currentPiece.input.count;
-                input = currentPiece.input;
-            }
-
-            // Currently this only allows flags to be accepted after the piece that
-            // calls for them is declared - possibly look to correct for this
-            if (Array.isArray(currentPiece.flags)) {
-                currentPiece.flags.forEach(function (flag) {
-                    localFlags.push(flag);
-                });
-            }
-
-            if (typeof currentPiece.next === 'object') {
-                current = currentPiece.next;
-            } else if (!isInput) {
-                // @TODO - Figure out why I did this
-                return;
-            }
-        } else if (typeof globalFlags[piece] === 'object') {
-            flags.push(globalFlags[piece]);
-        } else if (typeof localFlags[piece] === 'object') {
-            flags.push(localFlags[piece]);
-        }
-    });
-
-    // Apply defaults if no further pieces set while expecting input
-    if (isInput && typeof input === 'object' && Array.isArray(input.defaults)) {
-        console.log('updating for input');
-        console.log(input.defaults);
-
-        input.defaults.forEach(function (def, index) {
-            urlPieces = updateLastUrlPiece(urlPieces, def, index + 1, input);
-        });
-    }
-
-    var action = {
-        urlPieces: urlPieces,
-        urlPiecesFull: urlPiecesFull,
-        inputPieces: pieces,
-        navigate: navigation.openInCurrentTab,
-        navigateOptions: {},
-        endsOnInput: isInput,
-    };
-
-    flags.forEach(function (flag) {
-        if (Array.isArray(flag.mutations)) {
-            flag.mutations.forEach(function (mutation) {
-                action = mutation(action);
-            });
-        }
-
-        if (typeof flag.navigate === 'function') {
-            action.navigate = flag.navigate;
-        }
-
-        if (typeof flag.navigateOptions === 'object') {
-            action.navigateOptions = Object.assign(action.navigateOptions, flag.navigateOptions);
+    path.forEach(function (pathItem) {
+        if (pathItem.isFlag) {
+            action = updateFlagAction(action, pathItem);
+        } else if (pathItem.isInput) {
+            action = updateItemAction(action, pathItem);
+        } else {
+            action = updateStandardAction(action, pathItem);
         }
     });
 
     action.url = action.urlPieces.join('');
 
     return action;
+};
+
+/**
+ *
+ * @param {String} text
+ * @return {String}
+ */
+var sanitizedText = function (text) {
+    return text.trimRight().replace(/\s\s+/g, ' ');
+};
+
+var updateFlagAction = function (action, pathItem) {
+    var text = pathItem.text,
+        flag = globalFlags[text] ?? null;
+
+    if (flag !== null) {
+        flag.mutations.forEach(function (mutation) {
+            action = mutation(action);
+        });
+
+        if (isFunction(flag.navigate)) {
+            action.navigate = flag.navigate;
+        }
+
+        if (isObject(flag.navigateOptions)) {
+            action.navigateOptions = Object.assign(action.navigateOptions, flag.navigateOptions);
+        }
+    }
+
+    return action;
+};
+
+var updateItemAction = function (action, pathItem) {
+    var text = pathItem.text;
+
+    if (!text) {
+        text = pathItem.default;
+    }
+
+    if (pathItem.mutations.length > 0) {
+        pathItem.mutations.forEach(function (mutationName) {
+            text = mutations[mutationName](text);
+        });
+    }
+
+    if (pathItem.format) {
+        text = pathItem.format.replace('{+}', input);
+    }
+
+    action.urlPieces.push(text);
+
+    return action;
+};
+
+var updateStandardAction = function (action, pathItem) {
+    if (pathItem.replace) {
+        action.urlPieces = [pathItem.urlPiece];
+    } else {
+        action.urlPieces.push(pathItem.urlPiece);
+    }
+
+    return action;
+};
+
+/**
+ * @param {Object} keywordHierarchy
+ */
+var saveKeywordHierarchy = function (keywordHierarchy) {
+    chrome.storage.sync.set({ keywordHierarchy: keywordHierarchy }, function (result) {
+        alert('Saved');
+    });
+};
+
+/**
+ * @param {Object} keywordHierarchy
+ * @return {Object}
+ */
+var createComputedProps = function (keywordHierarchy) {
+    keywordHierarchy._nextIndex = {};
+    keywordHierarchy._suggestions = [];
+
+    if (isArray(keywordHierarchy.next)) {
+        keywordHierarchy.next.forEach(function (keywordObj, index) {
+            var keyword = keywordObj.keyword;
+
+            keywordHierarchy._nextIndex[keyword] = index;
+            keywordHierarchy._suggestions.push(keyword);
+
+            keywordObj = createComputedProps(keywordObj);
+        });
+    }
+
+    return keywordHierarchy;
 };

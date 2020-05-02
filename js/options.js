@@ -21,8 +21,5 @@ document.getElementById('save').addEventListener('click', function () {
     // var keywordHierarchy = JSON.parse(getTextInput().value);
     var keywordHierarchy = JSON.parse(editor.getValue());
 
-    chrome.storage.sync.set({ keywordHierarchy: keywordHierarchy }, function (result) {
-        // getTextInput().innerHTML = JSON.stringify(result.keywordHierarchy, null, 4);
-        alert('Saved');
-    });
+    saveKeywordHierarchy(keywordHierarchy);
 });
