@@ -1,7 +1,7 @@
 var app = new Vue({
     el: "#app",
     data: {
-        keywordHierarchy: {},
+        keywordHierarchy: [],
         promptOnDelete: true,
         minimized: false,
         componentKey: 0,
@@ -16,7 +16,7 @@ var app = new Vue({
         var self = this;
 
         chrome.storage.sync.get(['keywordHierarchy'], function (result) {
-            self.keywordHierarchy = result.keywordHierarchy
+            self.keywordHierarchy = result.keywordHierarchy.next;
         });
     },
     computed: {

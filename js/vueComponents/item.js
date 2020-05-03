@@ -15,7 +15,7 @@ var defaultOptions = {
 };
 
 var item = Vue.component('item', {
-    props: ['keyword', 'options', 'level', 'index'],
+    props: ['options', 'level', 'index'],
     data: function () {
         return {
             show: true,
@@ -23,20 +23,19 @@ var item = Vue.component('item', {
             showModal: false,
             delete: true,
             minimized: false,
-            $_keyword: null,
-            $_urlComponent: null,
+            // $_urlComponent: null,
             $_options: null,
             $_input: null,
             modalKey: 0,
         };
     },
     beforeMount: function () {
-        var defaults = Object.assign({}, defaultOptions),
-            keywordTest = parseFloat(this.keyword);
+        var defaults = Object.assign({}, defaultOptions);
+            // keywordTest = parseFloat(this.keyword);
 
         // Prevent mutation of props and store needed values on data
-        this.$_keyword = keywordTest < 1 && keywordTest !== 0 ? '' : this.keyword;
-        this.$_urlComponent = typeof this.options === 'object' ? this.options.self : this.options;
+        // this.$_keyword = keywordTest < 1 && keywordTest !== 0 ? '' : this.keyword;
+        // this.$_urlComponent = typeof this.options === 'object' ? this.options.self : this.options;
         // Massage the data if is object
         this.$_options = typeof this.options === 'object' ? Object.assign(defaults, this.options) : defaults;
         this.$_input = typeof this.options.input === 'object' ? this.options.input : {};
@@ -71,7 +70,7 @@ var item = Vue.component('item', {
             var keyword = this.$_keyword,
                 options = this.$_options;
 
-            options['self'] = this.$_urlComponent;
+            // options['self'] = this.$_urlComponent;
 
             if (typeof this.$refs.hierarchy !== 'undefined') {
                 options['next'] = this.$refs.hierarchy.getData();
@@ -81,10 +80,11 @@ var item = Vue.component('item', {
                 options['input'] = this.$_input;
             }
 
-            return {
-                keyword: keyword,
-                options: options,
-            };
+            // return {
+            //     keyword: keyword,
+            //     options: options,
+            // };
+            return options;
         },
         removeKeyword: function () {
             var self = this;
