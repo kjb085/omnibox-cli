@@ -21,10 +21,15 @@ Functionality wise the MVP is complete, although it has yet to be packaged and l
 More to be added
 
 **To Do**
+__In Progress__
  - Complete Vue.js based user interface allowing users to update all pieces of the data tree.
+ - Add eslint
+
+__Next Up__
  - Add page to display flags in options UI
  - Add testing
  - Add a section of the Vue.js based options page to allow users to test out commands to see the result during the editing phase
+ - Explore ability to natively hook into bookmarks without user defining commands
  - Explore the idea of templating to allow for resuability of command "tree branches"
  - Migrate to TypeScript
  - Meta functionality to ominibox such as ability to add, update, and delete commands
