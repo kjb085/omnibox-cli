@@ -1,25 +1,26 @@
-var pathCache = {},
+let pathCache = {},
+    actionCache = {},
     cacheEnabled = true;
 
 /**
  * @param {Object} keywordHierarchy
  * @param {String} text
  */
-var getPath = function (keywordHierarchy, text) {
-    var text = sanitizedText(text),
-        pieces = text.split(' '),
-        current = keywordHierarchy,
+const getPath = (keywordHierarchy, text) => {
+    const sanitezedText = getSanitizedText(text);
+
+    let current = keywordHierarchy,
         path = [],
         activeInput = {},
         inputCount = 0,
         inputLimit = 0;
 
     // Temporarily disabled
-    if (cacheEnabled && Array.isArray(pathCache[text])) {
-        return pathCache[text];
+    if (cacheEnabled && Array.isArray(pathCache[sanitezedText])) {
+        return pathCache[sanitezedText];
     }
 
-    pieces.forEach(function (piece) {
+    sanitezedText.split(' ').forEach((piece) => {
         // Is actively expecting input
         if (inputCount < inputLimit) {
             path.push(getInputPathItem(piece, activeInput, inputCount));
@@ -28,7 +29,7 @@ var getPath = function (keywordHierarchy, text) {
         } else if (piece.indexOf('-') === 0) {
             path.push(getFlagPathItem(piece));
         } else {
-            var currentIndex = current._nextIndex[piece] ?? null;
+            const currentIndex = current._nextIndex[piece] ?? null;
 
             if (currentIndex !== null) {
                 current = current.next[currentIndex];
@@ -56,7 +57,7 @@ var getPath = function (keywordHierarchy, text) {
     }
 
     if (cacheEnabled) {
-        pathCache[text] = path;
+        pathCache[sanitezedText] = path;
     }
 
     return path;
@@ -68,7 +69,7 @@ var getPath = function (keywordHierarchy, text) {
  * @param {Number} inputIndex
  * @return {Object}
  */
-var getInputPathItem = function (piece, activeInput, inputIndex) {
+const getInputPathItem = (piece, activeInput, inputIndex) => {
     return {
         text: piece,
         isInput: true,
@@ -86,7 +87,7 @@ var getInputPathItem = function (piece, activeInput, inputIndex) {
  * @param {Object} keywordObject
  * @return {Object}
  */
-var getStandardPathItem = function (piece, keywordObject) {
+const getStandardPathItem = (piece, keywordObject) => {
     return {
         text: piece,
         isInput: false,
@@ -101,7 +102,7 @@ var getStandardPathItem = function (piece, keywordObject) {
  * @param {String} piece
  * @return {Object}
  */
-var getFlagPathItem = function (piece) {
+const getFlagPathItem = (piece) => {
     return {
         text: piece,
         isInput: false,
@@ -119,15 +120,15 @@ var getFlagPathItem = function (piece) {
  * @param {String} text
  * @return {Object}
  */
-var getSuggestionInfo = function (keywordHierarchy, text) {
-    var path = getPath(keywordHierarchy, text),
+const getSuggestionInfo = (keywordHierarchy, text) => {
+    let path = getPath(keywordHierarchy, text),
         pieces = text.split(' '),
         lastItemIndex = pieces.length - 1,
         lastPiece = pieces[lastItemIndex],
         suggestions = [],
         prefix = [];
 
-    path.forEach(function (pathItem) {
+    path.forEach((pathItem) => {
         prefix.push(pathItem.text);
     });
 
@@ -137,7 +138,7 @@ var getSuggestionInfo = function (keywordHierarchy, text) {
         suggestions = Object.keys(globalFlags);
     } else {
         // Grab last set of valid suggestions
-        for (var index = path.length - 1; -1 < index; index--) {
+        for (let index = path.length - 1; -1 < index; index--) {
             if (path[index].suggestions !== null) {
                 suggestions = path[index].suggestions;
                 break;
@@ -146,7 +147,7 @@ var getSuggestionInfo = function (keywordHierarchy, text) {
     }
 
     if (lastPiece) {
-        suggestions = suggestions.filter(function (keyword) {
+        suggestions = suggestions.filter((keyword) => {
             return keyword.indexOf(lastPiece) === 0;
         });
     }
@@ -164,8 +165,12 @@ var getSuggestionInfo = function (keywordHierarchy, text) {
  * @param {String} text
  * @return {Object}
  */
-var getAction = function (keywordHierarchy, text) {
-    var path = getPath(keywordHierarchy, text),
+const getAction = (keywordHierarchy, text) => {
+    if (typeof actionCache[text] !== 'undefined') {
+        return actionCache[text];
+    }
+
+    let path = getPath(keywordHierarchy, text),
         action = {
             url: '',
             urlPieces: [],
@@ -175,7 +180,7 @@ var getAction = function (keywordHierarchy, text) {
             // Add in 'endsOnInput'?
         };
 
-    path.forEach(function (pathItem) {
+    path.forEach((pathItem) => {
         if (pathItem.isFlag) {
             action = updateFlagAction(action, pathItem);
         } else if (pathItem.isInput) {
@@ -195,12 +200,17 @@ var getAction = function (keywordHierarchy, text) {
  * @param {String} text
  * @return {String}
  */
-var sanitizedText = function (text) {
+const getSanitizedText = (text) => {
     return text.trimRight().replace(/\s\s+/g, ' ');
 };
 
-var updateFlagAction = function (action, pathItem) {
-    var text = pathItem.text,
+/**
+ * @param {Object} action
+ * @param {Object} pathItem
+ * @return {Object}
+ */
+const updateFlagAction = (action, pathItem) => {
+    let text = pathItem.text,
         flag = globalFlags[text] ?? null;
 
     if (flag !== null) {
@@ -220,8 +230,13 @@ var updateFlagAction = function (action, pathItem) {
     return action;
 };
 
-var updateItemAction = function (action, pathItem) {
-    var text = pathItem.text;
+/**
+ * @param {Object} action
+ * @param {Object} pathItem
+ * @return {Object}
+ */
+const updateItemAction = (action, pathItem) => {
+    let text = pathItem.text;
 
     if (!text) {
         text = pathItem.default;
@@ -242,7 +257,12 @@ var updateItemAction = function (action, pathItem) {
     return action;
 };
 
-var updateStandardAction = function (action, pathItem) {
+/**
+ * @param {Object} action
+ * @param {Object} pathItem
+ * @return {Object}
+ */
+const updateStandardAction = (action, pathItem) => {
     if (pathItem.replace) {
         action.urlPieces = [pathItem.urlPiece];
     } else {
@@ -253,10 +273,29 @@ var updateStandardAction = function (action, pathItem) {
 };
 
 /**
- * @param {Object} keywordHierarchy
+ * @param {Object} action
  */
-var saveKeywordHierarchy = function (keywordHierarchy) {
-    chrome.storage.sync.set({ keywordHierarchy: keywordHierarchy }, function (result) {
+const executeAction = (action) => {
+    let navigate = navigation.openInCurrentTab;
+
+    if (typeof action.navigate === 'function') {
+        navigate = action.navigate;
+    }
+
+    if (typeof action.navigateOptions.delay !== 'undefined') {
+        setTimeout(function () {
+            navigate(action.url, action.navigateOptions);
+        }, action.navigateOptions.delay * 1000);
+    } else {
+        navigate(action.url, action.navigateOptions);
+    }
+};
+
+/**
+ * @param {Array} keywordHierarchy
+ */
+const saveKeywordHierarchy = (keywordHierarchy) => {
+    chrome.storage.sync.set({ keywordHierarchy: { next: keywordHierarchy } }, (result) => {
         alert('Saved');
     });
 };
@@ -265,18 +304,18 @@ var saveKeywordHierarchy = function (keywordHierarchy) {
  * @param {Object} keywordHierarchy
  * @return {Object}
  */
-var createComputedProps = function (keywordHierarchy) {
+const addComputedProps = (keywordHierarchy) => {
     keywordHierarchy._nextIndex = {};
     keywordHierarchy._suggestions = [];
 
     if (isArray(keywordHierarchy.next)) {
         keywordHierarchy.next.forEach(function (keywordObj, index) {
-            var keyword = keywordObj.keyword;
+            let keyword = keywordObj.keyword;
 
             keywordHierarchy._nextIndex[keyword] = index;
             keywordHierarchy._suggestions.push(keyword);
 
-            keywordObj = createComputedProps(keywordObj);
+            keywordObj = addComputedProps(keywordObj);
         });
     }
 

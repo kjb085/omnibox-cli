@@ -1,25 +1,19 @@
 /**
  * Temp admin
  */
-var getTextInput = function () {
-    return document.getElementById('editor');
-};
-
-var editor = ace.edit("editor");
+const editor = ace.edit("editor");
 
 editor.setTheme("ace/theme/monokai");
 editor.session.setMode("ace/mode/javascript");
 
-chrome.storage.sync.get(['keywordHierarchy'], function (result) {
-    // getTextInput().innerHTML = JSON.stringify(result.keywordHierarchy, null, 4);
+chrome.storage.sync.get(['keywordHierarchy'], (result) => {
     editor.insert(JSON.stringify(result.keywordHierarchy, null, 4));
 
     editor.resize();
 });
 
-document.getElementById('save').addEventListener('click', function () {
-    // var keywordHierarchy = JSON.parse(getTextInput().value);
-    var keywordHierarchy = JSON.parse(editor.getValue());
+document.getElementById('save').addEventListener('click', () => {
+    let keywordHierarchy = JSON.parse(editor.getValue());
 
     saveKeywordHierarchy(keywordHierarchy);
 });

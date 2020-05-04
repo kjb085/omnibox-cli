@@ -1,5 +1,5 @@
 // Reserved keywords that are saved for future purposes of adding meta functionality to the omnibox
-var specialActions = {
+const specialActions = {
     add: {},
     update: {},
     delete: {},

@@ -1,18 +1,21 @@
-var flagDefinitions = {
+const flagDefinitions = {
     newTab: {
-        mutations: [],
         navigate: navigation.openInNewTab,
     },
     newWindow: {
-        mutate: [],
         navigate: navigation.openNewWindow,
     },
     incognito: {
-        mutate: [],
         navigate: navigation.openNewWindow,
         navigateOptions: {
             incognito: true,
         }
+    },
+    delay: {
+        navigateOptions: {
+            delay: 30,
+        },
+        input: true,
     },
     mutatePieceExample: {
         mutate: [
@@ -35,17 +38,23 @@ var flagDefinitions = {
         mutate: [
             {
                 whole: true,
-                mutate: mutations.toHelp, // Format a request to
+                mutate: mutations.toHelp, // Format a request to go to config page with everything except specified path minimized
             },
         ],
     }
 };
 
-var globalFlags = {
+const globalFlags = {
+    // New tab
     '--new-tab': flagDefinitions.newTab,
     '-t': flagDefinitions.newTab,
+    // New window
     '--new-window': flagDefinitions.newWindow,
     '-w': flagDefinitions.newWindow,
+    // New incognito window
     '--incognito': flagDefinitions.incognito,
     '-i': flagDefinitions.incognito,
+    // Delayed open - temporarily disabled
+    // '--delay': flagDefinitions.delay,
+    // '-d': flagDefinitions.delay,
 };
