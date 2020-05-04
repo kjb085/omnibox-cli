@@ -2,7 +2,7 @@
 
 A Chrome Extension that provides flexible, customizable command line interface for the Chrome Omnibox (URL bar) to help users to quickly build complex URLs and instruct the browser on when/where to open the resulting URL from a given command.
 
-MVP is currently complete and functional, although it has yet to be packaged and listed in the Chrome store. The target release is planned to occur upon the completion of a user friendly UI MVP.
+Functionality wise the MVP is complete, although it has yet to be packaged and listed in the Chrome store due to UI deficiencies. The target release is planned to occur upon the completion of a user friendly UI MVP.
 
 **Basic Examples**
  - A user a can create a command `github` and associate the base URL `https://www.github.com`. Upon entering the command the current tab will navigate to `https://www.github.com`.
