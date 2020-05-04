@@ -1,5 +1,5 @@
 {
-    "name": "Keyword Power",
+    "name": "Omnibox CLI",
     "description": "Easy browser nav",
     "omnibox": {
         "keyword": ">"
