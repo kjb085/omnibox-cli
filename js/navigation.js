@@ -22,7 +22,7 @@ const navigation = {
             url = 'http://' + url;
         }
 
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             chrome.tabs.update(tabs[0].id, {url: url});
         });
     },
@@ -32,8 +32,8 @@ const navigation = {
             url = 'http://' + url;
         }
 
-        chrome.tabs.query({active: false, currentWindow: true}, (tabs) => {
-            chrome.tabs.create({url: url});
+        chrome.tabs.query({ active: false, currentWindow: true }, (tabs) => {
+            chrome.tabs.create({ url: url });
         });
     },
 };

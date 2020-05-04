@@ -309,7 +309,7 @@ const addComputedProps = (keywordHierarchy) => {
     keywordHierarchy._suggestions = [];
 
     if (isArray(keywordHierarchy.next)) {
-        keywordHierarchy.next.forEach(function (keywordObj, index) {
+        keywordHierarchy.next.forEach((keywordObj, index) => {
             let keyword = keywordObj.keyword;
 
             keywordHierarchy._nextIndex[keyword] = index;
