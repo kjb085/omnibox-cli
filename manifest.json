@@ -15,7 +15,6 @@
             "js/navigation.js",
             "js/mutations.js",
             "js/flags.js",
-            "js/actions.js",
             "js/core.js",
             "js/background.js"
         ]
