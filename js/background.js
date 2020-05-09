@@ -4,14 +4,16 @@ let keywordHierarchy = {};
  * TODO - move invocation of addComputedProps to the save function
  */
 const setKeywordHierarchy = () => {
-    chrome.storage.sync.get(['keywordHierarchy'], (result) => {
-        keywordHierarchy = addComputedProps(result.keywordHierarchy);
-        // Move this and/or have setKeywordHierarchy accept a callback
-        commandCache = {};
+    getFromStorage(
+        ['keywordObjects'],
+        (result) => {
+            keywordHierarchy = getKeywordHierarchy(result.keywordObjects);
+            commandCache = {};
 
-        console.log('Keyword hierarchy changed:');
-        console.log(result);
-    });
+            console.log('Keyword hierarchy changed:');
+            console.log(result);
+        }
+    );
 };
 
 // Set keyword hierachy as local variable

@@ -7,7 +7,7 @@ let pathCache = {},
  * @param {String} text
  */
 const getPath = (keywordHierarchy, text) => {
-    const sanitezedText = getSanitizedText(text);
+    const sanitizedText = getSanitizedText(text);
 
     let current = keywordHierarchy,
         path = [],
@@ -16,11 +16,11 @@ const getPath = (keywordHierarchy, text) => {
         inputLimit = 0;
 
     // Temporarily disabled
-    if (cacheEnabled && Array.isArray(pathCache[sanitezedText])) {
-        return pathCache[sanitezedText];
-    }
+    // if (cacheEnabled && Array.isArray(pathCache[sanitizedText])) {
+    //     return pathCache[sanitizedText];
+    // }
 
-    sanitezedText.split(' ').forEach((piece) => {
+    sanitizedText.split(' ').forEach((piece) => {
         // Is actively expecting input
         if (inputCount < inputLimit) {
             path.push(getInputPathItem(piece, activeInput, inputCount));
@@ -56,9 +56,10 @@ const getPath = (keywordHierarchy, text) => {
         }
     }
 
-    if (cacheEnabled) {
-        pathCache[sanitezedText] = path;
-    }
+    // Temporarily disabled
+    // if (cacheEnabled) {
+    //     pathCache[sanitizedText] = path;
+    // }
 
     return path;
 };
@@ -292,12 +293,44 @@ const executeAction = (action) => {
 };
 
 /**
- * @param {Array} keywordHierarchy
+ * @param {Array} keywordObjects
  */
-const saveKeywordHierarchy = (keywordHierarchy) => {
-    chrome.storage.sync.set({ keywordHierarchy: { next: keywordHierarchy } }, (result) => {
-        alert('Saved');
+const saveKeywordObjects = (keywordObjects) => {
+    const reservedKeywords = Object.keys(specialActions);
+    let okToSave = true,
+        errorKeywords = [];
+
+    keywordObjects.forEach((item) => {
+        const keyword = item.keyword;
+
+        if (reservedKeywords.indexOf(keyword) > -1) {
+            okToSave = false;
+            errorKeywords.push(keyword);
+        }
     });
+
+    if (okToSave) {
+        chrome.storage.sync.set({ keywordObjects: keywordObjects }, (result) => {
+            alert('Saved');
+        });
+    } else {
+        alert('Following keywords are reserved words and cannot be used as top level commands: ' +
+            errorKeywords.join(', '));
+    }
+};
+
+/**
+ * @param {Array} keywordHierarchy
+ * @return {Object}
+ */
+const getKeywordHierarchy = (keywordObjects) => {
+    let keywordHierarchy = {
+        next: keywordObjects,
+    };
+
+    keywordHierarchy = addComputedProps(keywordHierarchy);
+
+    return keywordHierarchy;
 };
 
 /**
@@ -320,4 +353,29 @@ const addComputedProps = (keywordHierarchy) => {
     }
 
     return keywordHierarchy;
+};
+
+/**
+ * @param {Array} keys
+ */
+const getFromStorage = (keys, callback) => {
+    chrome.storage.sync.get(keys, (result) => {
+        callback(result);
+        // console.log(result);
+
+        // keywordHierarchy = getKeywordHierarchy(result.keywordObjects);
+        // // Move this and/or have setKeywordHierarchy accept a callback
+        // commandCache = {};
+
+        // console.log('Keyword hierarchy changed:');
+        // console.log(result);
+    });
+};
+
+// Reserved keywords that are saved for future purposes of adding meta functionality to the omnibox
+const specialActions = {
+    add: {},
+    update: {},
+    delete: {},
+    bookmarks: {},
 };
