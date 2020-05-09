@@ -21,6 +21,7 @@ Functionality wise the MVP is complete, although it has yet to be packaged and l
 More to be added
 
 **To Do**
+
 __In Progress__
  - Complete Vue.js based user interface allowing users to update all pieces of the data tree.
  - Add eslint
