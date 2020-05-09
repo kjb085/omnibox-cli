@@ -6,14 +6,20 @@ const editor = ace.edit("editor");
 editor.setTheme("ace/theme/monokai");
 editor.session.setMode("ace/mode/javascript");
 
-chrome.storage.sync.get(['keywordHierarchy'], (result) => {
-    editor.insert(JSON.stringify(result.keywordHierarchy, null, 4));
+// Update text editor
+getFromStorage(['keywordObjects'], (result) => {
+    editor.insert(JSON.stringify(result.keywordObjects, null, 4));
 
     editor.resize();
 });
 
 document.getElementById('save').addEventListener('click', () => {
-    let keywordHierarchy = JSON.parse(editor.getValue());
+    let keywordObjects = JSON.parse(editor.getValue());
 
-    saveKeywordHierarchy(keywordHierarchy);
+    if (!isArray(keywordObjects)) {
+        alert('Keyword objects must be an array of objects');
+        return;
+    }
+
+    saveKeywordObjects(keywordObjects);
 });
