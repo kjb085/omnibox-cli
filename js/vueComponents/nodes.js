@@ -12,6 +12,7 @@ var defaultOptions = {
     next: {},
     new: null, // Options: null, 'tab', 'window'
     suggestions: [], // Still to decide on this
+    options: {},
 };
 
 var nodes = Vue.component('nodes', {
@@ -59,39 +60,53 @@ var nodes = Vue.component('nodes', {
             }
         },
         getData: function () {
-            var self = this,
-                hierarchy = {};
+            let self = this,
+                data = [];
 
-            if (Array.isArray(this.$refs.item)) {
-                this.$refs.item.forEach(function (ref) {
-                    var data = ref.getData();
-
-                    hierarchy = self.updateHierarchy(hierarchy, data);
+            if (Array.isArray(self.$refs.item)) {
+                self.$refs.item.forEach(function (ref) {
+                    data.push(ref.getData());
                 });
-            } else if (typeof this.$refs.item === 'object') {
-                data = this.$refs.item.getData();
-
-                hierarchy = self.updateHierarchy(hierarchy, data);
             }
 
-            return hierarchy;
+            return data;
         },
-        updateHierarchy: function (hierarchy, data) {
-            var keyword = data.keyword;
+        // getData: function () {
+        //     var self = this,
+        //         hierarchy = [];
 
-            if (!data.options.delete) {
-                if (typeof hierarchy[keyword] !== 'undefined') {
-                    swal('Keyword collision');
+        //     if (Array.isArray(this.$refs.item)) {
+        //         this.$refs.item.forEach(function (ref) {
+        //             var data = ref.getData();
 
-                    // Add error highlighting
+        //             hierarchy = self.updateHierarchy(hierarchy, data);
+        //         });
+        //     } else if (typeof this.$refs.item === 'object') {
+        //         data = this.$refs.item.getData();
 
-                    throw new Error('keyword collision: ' + keyword);
-                }
+        //         hierarchy = self.updateHierarchy(hierarchy, data);
+        //     }
 
-                hierarchy[keyword] = data.options;
-            }
+        //     return hierarchy;
+        // },
+        // updateHierarchy: function (hierarchy, data) {
+        //     var keyword = data.keyword;
 
-            return hierarchy;
-        },
+        //     console.log(data);
+
+        //     if (!data.options.delete) {
+        //         if (typeof hierarchy[keyword] !== 'undefined') {
+        //             swal('Keyword collision');
+
+        //             // Add error highlighting
+
+        //             throw new Error('keyword collision: ' + keyword);
+        //         }
+
+        //         hierarchy[keyword] = data.options;
+        //     }
+
+        //     return hierarchy;
+        // },
     },
 });

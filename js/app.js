@@ -1,7 +1,7 @@
 var app = new Vue({
     el: "#app",
     data: {
-        keywordHierarchy: [],
+        keywordObjects: [],
         promptOnDelete: true,
         minimized: false,
         componentKey: 0,
@@ -15,8 +15,8 @@ var app = new Vue({
     beforeMount: function () {
         var self = this;
 
-        chrome.storage.sync.get(['keywordHierarchy'], function (result) {
-            self.keywordHierarchy = result.keywordHierarchy.next;
+        getFromStorage(['keywordObjects'], (result) => {
+            self.keywordObjects = result.keywordObjects;
         });
     },
     computed: {
@@ -26,13 +26,14 @@ var app = new Vue({
     },
     methods: {
         addPrimaryKeyword: function () {
-            var keywordHierarchy = this.keywordHierarchy,
-                uniqid = Math.random();
+            var keywordObjects = this.keywordObjects;
 
-            keywordHierarchy[uniqid] = defaultOptions;
+            // keywordObjects[uniqid] = defaultOptions;
 
-            this.keywordHierarchy = keywordHierarchy;
-            this.componentKey += 1;
+            keywordObjects.push(defaultOptions);
+
+            // this.keywordObjects = keywordObjects;
+            // this.componentKey += 1;
         },
         disablePromptOnDelete: function () {
             this.promptOnDelete = false;
@@ -49,9 +50,9 @@ var app = new Vue({
             this.navImages[navImage] = false;
         },
         save: function () {
-            var keywordHierarchy = this.$refs.hierarchy.getData();
+            var keywordObjects = this.$refs.hierarchy.getData();
 
-            console.log(keywordHierarchy);
+            console.log(keywordObjects);
 
             // @TODO implement storage sync save
             // saveKeywordHierarchy(keywordHierarchy);

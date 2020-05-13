@@ -221,7 +221,7 @@
             </div>
         </nav>
         <div id="keyword-hierarchy">
-            <nodes :nodes="keywordHierarchy" :level="0" :key="componentKey" :ref="'hierarchy'"></nodes>
+            <nodes :nodes="keywordObjects" :level="0" :key="componentKey" :ref="'hierarchy'"></nodes>
         </div>
 
         <!-- <modal v-if="showModal" @close="showModal = false">
@@ -245,6 +245,7 @@
 
 <!-- Custom JS -->
 <!-- <script></script> -->
+<!-- <script src='/js/global.js'></script> -->
 <script src='/js/core.js'></script>
 <!-- Vue components -->
 <script src='/js/vueComponents/inputModal.js'></script>

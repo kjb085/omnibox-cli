@@ -12,6 +12,7 @@ var defaultOptions = {
     next: {},
     new: null, // Options: null, 'tab', 'window'
     suggestions: [], // Still to decide on this
+    options: {},
 };
 
 var item = Vue.component('item', {
@@ -67,8 +68,7 @@ var item = Vue.component('item', {
             this.minimized = minimized;
         },
         getData: function () {
-            var keyword = this.$_keyword,
-                options = this.$_options;
+            var options = this.options;
 
             // options['self'] = this.$_urlComponent;
 
@@ -76,7 +76,7 @@ var item = Vue.component('item', {
                 options['next'] = this.$refs.hierarchy.getData();
             }
 
-            if (typeof this.$_input.accpet !== 'undefined') {
+            if (typeof this.$_input.accept !== 'undefined') {
                 options['input'] = this.$_input;
             }
 
