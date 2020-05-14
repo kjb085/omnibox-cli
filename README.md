@@ -27,6 +27,7 @@ __In Progress__
  - Add eslint
 
 __Next Up__
+ - Add import/export options
  - Add page to display flags in options UI
  - Add testing
  - Add a section of the Vue.js based options page to allow users to test out commands to see the result during the editing phase
